@@ -1,0 +1,101 @@
+SELECT * FROM Orders;
++---------+----------+-----------+----------+---------+------------+
+| OrderID | ClientID | ProductID | Quantity | Cost    | Date       |
++---------+----------+-----------+----------+---------+------------+
+|       1 | Cl1      | P1        |       10 |  500.00 | 2020-09-01 |
+|       2 | Cl2      | P2        |        5 |  100.00 | 2020-09-05 |
+|       3 | Cl3      | P3        |       20 |  800.00 | 2020-09-03 |
+|       4 | Cl4      | P4        |       15 |  150.00 | 2020-09-07 |
+|       5 | Cl3      | P3        |       10 |  450.00 | 2020-09-08 |
+|       6 | Cl2      | P2        |        5 |  800.00 | 2020-09-09 |
+|       7 | Cl1      | P4        |       22 | 1200.00 | 2020-09-10 |
+|       8 | Cl3      | P1        |       15 |  150.00 | 2020-09-10 |
+|       9 | Cl1      | P1        |       10 |  500.00 | 2020-09-12 |
+|      10 | Cl2      | P2        |        5 |  100.00 | 2020-09-13 |
+|      11 | Cl4      | P5        |        5 |  100.00 | 2020-09-15 |
+|      12 | Cl1      | P1        |       10 |  500.00 | 2022-09-01 |
+|      13 | Cl2      | P2        |        5 |  100.00 | 2022-09-05 |
+|      14 | Cl3      | P3        |       20 |  800.00 | 2022-09-03 |
+|      15 | Cl4      | P4        |       15 |  150.00 | 2022-09-07 |
+|      16 | Cl3      | P3        |       10 |  450.00 | 2022-09-08 |
+|      17 | Cl2      | P2        |        5 |  800.00 | 2022-09-09 |
+|      18 | Cl1      | P4        |       22 | 1200.00 | 2022-09-10 |
+|      19 | Cl3      | P1        |       15 |  150.00 | 2022-09-10 |
+|      20 | Cl1      | P1        |       10 |  500.00 | 2022-09-12 |
+|      21 | Cl2      | P2        |        5 |  100.00 | 2022-09-13 |
+|      22 | Cl2      | P1        |       10 |  500.00 | 2021-09-01 |
+|      23 | Cl2      | P2        |        5 |  100.00 | 2021-09-05 |
+|      24 | Cl3      | P3        |       20 |  800.00 | 2021-09-03 |
+|      25 | Cl4      | P4        |       15 |  150.00 | 2021-09-07 |
+|      26 | Cl1      | P3        |       10 |  450.00 | 2021-09-08 |
+|      27 | Cl2      | P1        |       20 | 1000.00 | 2022-09-01 |
+|      28 | Cl2      | P2        |       10 |  200.00 | 2022-09-05 |
+|      29 | Cl3      | P3        |       20 |  800.00 | 2021-09-03 |
+|      30 | Cl1      | P1        |       10 |  500.00 | 2022-09-01 |
++---------+----------+-----------+----------+---------+------------+
+30 rows in set (0.02 sec)
+
+-- create function prints the cost value of a specific order based on the user input of the OrderID
+DELIMITER //
+CREATE FUNCTION GetCost(orderid INT) RETURNS DECIMAL(5,2) DETERMINISTIC
+BEGIN
+DECLARE OrderCost DECIMAL(5,2);
+SELECT Cost INTO OrderCost FROM Orders WHERE Orders.OrderID = orderid;
+RETURN OrderCost;
+END //
+DELIMITER ;
+SELECT GetCost(5);
++------------+
+| GetCost(5) |
++------------+
+|     450.00 |
++------------+
+1 row in set (0.00 sec)
+
+-- create function to get Order quantity in 1 date
+DELIMITER //
+CREATE FUNCTION NumberOfOrder(OrderDate DATE) RETURNS INT DETERMINISTIC
+BEGIN
+DECLARE OrderNo INT;
+SELECT COUNT(OrderID) INTO OrderNo FROM Orders WHERE Orders.Date = OrderDate;
+RETURN OrderNo;
+END //
+DELIMITER ;
+SELECT NumberOfOrder('2021-09-07');
++-----------------------------+
+| NumberOfOrder('2021-09-07') |
++-----------------------------+
+|                           1 |
++-----------------------------+
+1 row in set (0.00 sec)
+
+-- create function to get classify customer base on cost
+DELIMITER //
+    CREATE FUNCTION ClassifyCustomer(CustomerID VARCHAR(3)) RETURNS VARCHAR(50) DETERMINISTIC
+BEGIN
+    DECLARE CustomerCost DECIMAL(7,2);
+    DECLARE CustomerClass VARCHAR(50);
+    SELECT SUM(COST) INTO CustomerCost FROM Orders WHERE Orders.ClientID = CustomerID;
+    SET CustomerClass = CASE
+    WHEN CustomerCost >= 5000 THEN 'Platinumn'
+    WHEN CustomerCost >= 2500 THEN 'Gold'
+    ELSE 'SiLver'
+    END;
+    RETURN CustomerClass;
+END //
+DELIMITER ;
+SELECT ClassifyCustomer('Cl1');
++-------------------------+
+| ClassifyCustomer('Cl1') |
++-------------------------+
+| Platinumn               |
++-------------------------+
+1 row in set (0.00 sec)
+SELECT ClassifyCustomer('Cl2');
++-------------------------+
+| ClassifyCustomer('Cl2') |
++-------------------------+
+| Gold                    |
++-------------------------+
+1 row in set (0.00 sec)
+    
