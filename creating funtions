@@ -34,7 +34,7 @@ SELECT * FROM Orders;
 |      30 | Cl1      | P1        |       10 |  500.00 | 2022-09-01 |
 +---------+----------+-----------+----------+---------+------------+
 30 rows in set (0.02 sec)
-
+-- FUNCTION
 -- create function prints the cost value of a specific order based on the user input of the OrderID
 DELIMITER //
 CREATE FUNCTION GetCost(orderid INT) RETURNS DECIMAL(5,2) DETERMINISTIC
@@ -98,4 +98,37 @@ SELECT ClassifyCustomer('Cl2');
 | Gold                    |
 +-------------------------+
 1 row in set (0.00 sec)
-    
+
+-- PROCEDURE
+-- Create a stored procedure called GetDiscount. This stored procedure must return the final cost of the customer's order after the discount value has been deducted. If the value of the order quantity is more than or equal to 20 then the procedure should return the new cost after a 20% discount. If the value of the order quantity is less than 20 and more than or equal to 10 then the procedure should return the new cost after a 10% discount.
+DELIMITER //
+CREATE PROCEDURE GetDiscount(orderid INT)
+BEGIN
+DECLARE CostAfterDiscount DECIMAL(5,2);
+DECLARE OrderCost DECIMAL(5,2);
+DECLARE OrderQuantity INT;
+SELECT Quantity INTO OrderQuantity FROM Orders WHERE Orders.OrderID = orderid;
+SELECT Cost INTO OrderCost FROM Orders WHERE Orders.OrderID = orderid;
+SET CostAfterDiscount = CASE
+WHEN OrderQuantity >= 20 THEN OrderCost - (OrderCost*20/100)
+WHEN OrderQuantity >= 10 THEN OrderCost - (OrderCost*10/100)
+ELSE OrderCost
+END;
+SELECT CostAfterDiscount;
+END //
+DELIMITER ;
++-------------------+
+| CostAfterDiscount |
++-------------------+
+|            405.00 |
++-------------------+
+1 row in set (0.00 sec)
+
+-- Create average quantity base on customer and product id
+DELIMITER //
+CREATE PROCEDURE AverageQuantity(IN customerid VARCHAR(3), IN productid VARCHAR(2), OUT AVGqty DECIMAL(5,2))
+BEGIN
+DECLARE AVGqty DECIMAL(5,2);
+SELECT AVERAGE(Quantity) INTO AVGqty FROM Orders WHERE Orders.ClientID = customerid AND Orders.ProductID = productid;
+END //
+DELIMITER ;
