@@ -40,7 +40,7 @@ SELECT * FROM Orders;
 -- Create a SQL function that prints the cost value of a specific order based on the user input of the OrderID. The expected output result should be the same as the result in the screenshot below when you call the function with an OrderID of 5.
 DELIMITER //
 CREATE FUNCTION Findcost(orderid INT) RETURNS DECIMAL(5,2) DETERMINISTIC BEGIN DECLARE order_cost DECIMAL(5,2); 
-SELECT Cost INTO order_cost FROM Orders WHERE OrderID = orderid LIMIT 1; RETURN order_cost; END //
+SELECT Cost INTO order_cost FROM Orders WHERE OrderID = orderid; RETURN order_cost; END //
 DELIMITER ;
 SELECT Findcost(5);
 +-------------+
@@ -70,3 +70,11 @@ END IF;
 SELECT CostAfterDiscount;
 END //
 DELIMITER ;
+
+mysql> CALL GetDiscount(5);
++---------------------+
+| cost_after_discount |
++---------------------+
+|              405.00 |
++---------------------+
+1 row in set (0.00 sec)
